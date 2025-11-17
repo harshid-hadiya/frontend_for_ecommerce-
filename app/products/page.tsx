@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { useRouter,useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { apiCall } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,10 +30,17 @@ export default function ProductsPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const { user } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const sortParam = searchParams.get("sort") || "desc"; 
+  const [sortParam, setSortParam] = useState('desc');
 
+  // Get sort param from URL (browser only)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      setSortParam(params.get('sort') || 'desc');
+    }
+  }, []);
 
+  // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -58,8 +65,9 @@ export default function ProductsPage() {
     };
 
     fetchProducts();
-  }, []);
+  }, [sortParam]);
 
+  // Filter products
   useEffect(() => {
     let filtered = products;
 
